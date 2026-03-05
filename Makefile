@@ -1,16 +1,22 @@
-.PHONY: help smoke test clean
+# Proje Ayarları
+SIM ?= verilator
+TOPLEVEL_LANG ?= verilog
 
-help:
-	@echo "Targets:"
-	@echo "  make smoke   - run cocotb+verilator smoke test"
-	@echo "  make test    - run all tests"
-	@echo "  make clean   - remove build/test artifacts"
+# RTL Dosyaları
+VERILOG_SOURCES += $(PWD)/rtl/csr_block.sv
+VERILOG_SOURCES += $(PWD)/rtl/uart_top.sv
+VERILOG_SOURCES += $(PWD)/rtl/fifo.sv
 
-smoke:
-	pytest -q
+# Üst Seviye Modül Adı (RTL'deki module ismi)
+TOPLEVEL = uart_top
 
-test:
-	pytest -q
+# Test Dosyası (tests/test_csr.py -> test_csr)
+MODULE = tests.test_fifo
 
-clean:
-	rm -rf reports/latest/sim_build .pytest_cache tests/__pycache__
+# Cocotb'nin kendi kurallarını dahil et
+include $(shell cocotb-config --makefiles)/Makefile.sim
+
+# Temizlik komutu
+clean_all:
+	rm -rf sim_build/ __pycache__ tests/__pycache__
+	rm -f results.xml
