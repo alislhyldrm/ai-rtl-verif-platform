@@ -1,6 +1,7 @@
 # --- Makefile ---
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
+COMPILE_ARGS += --coverage
 
 # Projedeki tüm RTL dosyalarını buraya ekliyoruz
 VERILOG_SOURCES += $(PWD)/rtl/fifo.sv
