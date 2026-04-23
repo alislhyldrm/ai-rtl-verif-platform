@@ -1,0 +1,10 @@
+module: uart_rx
+rtl_file: rtl/uart_rx.sv
+protocol: UART_8N1
+baud_divs: [10, 20, 50]
+test_data: [0x00, 0xFF, 0xA5, 0xCA, 0x55]
+error_injection:
+  - frame_error
+coverage_target_pct: 90
+max_iterations: 5
+golden_model: tests/test_uart_rx.py
