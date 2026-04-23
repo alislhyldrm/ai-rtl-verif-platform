@@ -13,28 +13,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Architecture spec:** `docs/superpowers/specs/2026-04-23-architecture-design.md` — fully approved, read this first.
 
-**Backend implementation plan:** `docs/superpowers/plans/2026-04-23-backend.md` — 10 tasks (M5–M8), TDD, ready to execute. **Start here next session.**
+**Backend:** COMPLETE. All 10 tasks from `docs/superpowers/plans/2026-04-23-backend.md` implemented and passing (25/25 tests green). FastAPI REST + WebSocket, RTL parser, LLM client, sim runner, coverage parser, loop orchestrator.
+
+**Frontend implementation plan:** `docs/superpowers/plans/2026-04-23-frontend.md` — 8 tasks (M9), TDD, ready to execute. **Start here next session.**
 
 **Future improvements:** `docs/superpowers/ROADMAP.md` — 7 items with industry context, pros/cons, priority table.
 
-**What's built so far (Phase 2):** Architecture design only. No backend/frontend code written yet. Next step = execute the backend plan task by task.
-
 ## What to Build Next
 
-Execute `docs/superpowers/plans/2026-04-23-backend.md` using the `superpowers:executing-plans` or `superpowers:subagent-driven-development` skill. Tasks are:
+Execute `docs/superpowers/plans/2026-04-23-frontend.md` using the `superpowers:executing-plans` or `superpowers:subagent-driven-development` skill. Tasks are:
 
-1. Backend scaffold + dependencies (`requirements-backend.txt`, init files)
-2. `backend/parser/schema.py` — `Port`, `RtlInterface` Pydantic models
-3. `backend/parser/rtl_parser.py` — regex SV parser
-4. `backend/plan/schema.py` — `VerificationPlan` + `plans/uart_rx.yaml`
-5. `backend/llm/client.py` — Anthropic async client with prompt caching
-6. `backend/llm/prompt_builder.py` — deterministic structured prompts
-7. `backend/sim_runner/runner.py` — async Verilator subprocess
-8. `backend/coverage/parser.py` — lcov `.info` → gap list
-9. `backend/orchestrator/loop.py` — `VerificationLoop`
-10. `backend/main.py` — FastAPI REST + WebSocket
-
-After backend: write Frontend plan (M9) — React + TypeScript + Vite dashboard.
+1. Frontend scaffold (Vite + React + TypeScript + shadcn + Tailwind + Vitest)
+2. API types + HTTP client (TypeScript interfaces matching backend Pydantic models)
+3. App shell + routing (dark sidebar, React Router, two pages)
+4. RTL upload + interface preview
+5. Plan configuration form
+6. WebSocket hook (`useVerificationRun`) + run state machine
+7. Live run dashboard (iteration stepper, log viewer, coverage chart)
+8. Test code viewer (Monaco tabs per iteration) + smoke test
 
 ## Key Architecture Decisions (do not revisit)
 
@@ -147,9 +143,9 @@ Golden-model style — no UVM. One side drives DUT, Python model drives/reads th
 | 2 | ✅ Done | FIFO + unit tests |
 | 3 | ✅ Done | UART TX engine + golden model tests |
 | 4 | ✅ Done | UART RX engine + center-sampling validation |
-| 5 | ✅ Design done | Architecture spec + backend plan written |
-| 6 | 🔄 Next | Execute backend plan (Tasks 1–10) |
-| 7 | ⬜ Pending | Frontend plan + implementation (M9) |
+| 5 | ✅ Done | Architecture spec + backend plan written |
+| 6 | ✅ Done | Backend implemented — 25/25 tests green |
+| 7 | 🔄 Next | Frontend implementation (M9) — plan at `docs/superpowers/plans/2026-04-23-frontend.md` |
 
 ## Key Constraints
 
