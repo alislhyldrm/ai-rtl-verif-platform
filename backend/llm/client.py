@@ -12,6 +12,10 @@ Rules:
 - Use RisingEdge(dut.clk) for clock synchronization
 - Use Timer(N, unit="ns") only for reset sequences
 - Always initialize and deassert reset before testing
+- Keep tests CONCISE: 1-3 @cocotb.test() functions maximum.
+  Output must be COMPLETE Python that ends with closing syntax.
+  Better a short working test than a long truncated one.
+- Do not write helper functions unless strictly necessary; inline logic.
 """
 
 
@@ -22,7 +26,7 @@ class LLMClient:
     async def generate(self, rtl_context: str, task_prompt: str) -> str:
         response = await self._client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=8192,
             system=[
                 {
                     "type": "text",

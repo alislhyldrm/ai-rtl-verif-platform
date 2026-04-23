@@ -1,6 +1,6 @@
-# Platform Roadmap — Future Improvements
+# TODO — Future Improvements
 
-This file tracks planned upgrades beyond the MVP. Each item explains what it is, why it matters, how we'd implement it, and what the industry says about it.
+This is a todo list of upgrades planned beyond the MVP. Each item explains what it is, why it matters, how to implement it, and any industry context.
 
 ---
 
@@ -16,7 +16,7 @@ This file tracks planned upgrades beyond the MVP. Each item explains what it is,
 
 ---
 
-## Roadmap Items
+## TODO Items
 
 ---
 
@@ -194,10 +194,67 @@ For `uart_rx`: did we cover IDLE→START, START→IDLE (false start), DATA→STO
 
 ---
 
+### 8. Replace Claude-as-Generator with a Cheaper Model or a Dedicated Test-Generation Agent (High Priority — Cost)
+
+**What:** Right now every iteration hits the Claude API (`claude-sonnet-4-6`) to generate a cocotb test from scratch. At 8192 `max_tokens` and up to 10 iterations per run, a single verification session can cost $0.10–$0.50. That's fine for a demo but prohibitive for CI or day-to-day use on multi-module designs.
+
+There are two complementary directions:
+
+**Direction A — Swap the model for a cheaper one.** Keep the exact same prompt pipeline but route the generation call to a smaller/cheaper model. Candidates:
+
+- `claude-haiku-4-5` — Anthropic's small model. ~5× cheaper than Sonnet for comparable code output. Probably the best drop-in replacement.
+- `gpt-4.1-mini` / `gpt-4o-mini` (OpenAI) — similar cost class. Needs a provider abstraction (overlaps with item #5).
+- Local models via Ollama (`qwen2.5-coder:7b`, `deepseek-coder-v2`) — free after hardware cost. Slower but zero per-call cost. Quality on SystemVerilog-context-aware Python generation is the open question.
+- A tiered strategy: first N iterations use Haiku (cheap exploration), only the final refinement iteration uses Sonnet (polish). Lets you spend tokens where they matter.
+
+**Direction B — Build a dedicated test-generation agent.** Instead of one-shot prompting Claude to "write a cocotb test," give a smaller model a structured toolset and let it compose tests from known-good building blocks:
+
+- Build a library of cocotb **primitives** already known to compile and run: `reset_dut()`, `drive_clock()`, `uart_send_byte()`, `sample_line_at_baud_center()`, etc. — pre-validated, golden.
+- Define a JSON-schema "test recipe" format: `{reset, clock, stimuli: [...], checks: [...]}`. The agent's only job is to fill this schema from the RTL context + gap list.
+- A tiny deterministic **rendering step** (no LLM) converts the recipe to a cocotb Python file by concatenating primitives. The LLM never writes raw Python — it composes.
+- Coverage gaps are fed back as structured hints: `"target branch at uart_rx.sv:57 — enable frame_error stimulus"`. The agent responds by adding a `frame_error` stimulus primitive to the recipe.
+
+**Why both approaches matter:**
+
+- **Direction A** is a 1-hour change — swap a string, test, done. Immediate cost savings.
+- **Direction B** is a 1-2 week project, but it solves a different problem: **reliability**. Right now ~40% of iterations waste because Claude writes Python with subtle bugs (see this project's history — 5/5 iterations at 0% coverage for uart_tx was a prompt-truncation bug, but plenty of other failures are semantic). An agent composing pre-validated primitives has a drastically lower failure rate. The cost saving is a side effect — the real win is that every iteration produces a running test.
+
+**Industry relevance:** Both patterns are active in EDA AI today. Synopsys.ai VSO and Cadence Verisium use a mix of general LLMs and task-specific fine-tuned models. The "agent with tools" pattern maps directly to what LangGraph, AutoGen, and the Claude Agent SDK exist to support. Building a verification-specific agent with domain primitives is exactly the kind of work that gets hired for at Synopsys/Cadence.
+
+**How to implement (Direction A, fast path):**
+
+- In `backend/llm/client.py`, change `model="claude-sonnet-4-6"` to `model="claude-haiku-4-5"`.
+- Add a `model: str = "claude-haiku-4-5"` field to `VerificationPlan` so users can opt into Sonnet for hard modules.
+- Frontend adds a dropdown in `PlanForm`.
+- Measure: run the same module 5× with each model, compare avg coverage at iteration 5.
+
+**How to implement (Direction B, proper agent):**
+
+- Create `backend/agent/primitives.py` — hand-written, tested cocotb helpers. Each primitive has a name, docstring, parameter schema, and implementation.
+- Create `backend/agent/recipe.py` — Pydantic model for a test recipe: list of primitive calls with bound arguments.
+- Create `backend/agent/renderer.py` — pure function `render(recipe) -> str`. Concatenates primitives, imports, and wraps in `@cocotb.test()`.
+- Create `backend/agent/planner.py` — LLM-backed function that takes `(RtlInterface, gaps, available_primitives)` → `Recipe`. This is where the LLM call happens, but the output is constrained JSON, not arbitrary Python.
+- Keep the existing `prompt_builder.py` + `llm/client.py` as a fallback for modules the primitive library doesn't cover (e.g., when testing a new protocol).
+- The orchestrator chooses per-run: `use_agent: bool` in the plan.
+
+**Advantages:**
+
+- **A:** ~5× cheaper in minutes. Low engineering cost.
+- **B:** Much lower hallucination rate. Every test is guaranteed syntactically valid. Debugging happens at the primitive layer once, not per-generation. Can use a small/local model because the task is "pick primitives from a list," not "write Python from scratch."
+
+**Disadvantages:**
+
+- **A:** Smaller models may write lower-quality tests — need empirical comparison.
+- **B:** Primitive library is per-protocol. UART is easy (we have golden models already). SPI, I2C, AXI each need their own primitives. Doesn't generalize to arbitrary RTL until the library grows.
+- **B:** Initial implementation cost is real (week+). Only pays off if we expect many verification runs.
+
+---
+
 ## Priority Summary
 
 | Item | Priority | Effort | Industry Signal |
 |------|----------|--------|-----------------|
+| Replace model / build agent (item 8) | High | Low (A) / High (B) | Very High |
 | FSM Transition Coverage | High | Medium | High |
 | Functional Covergroups | Medium | High | Very High |
 | Golden Model Integration | Medium | Low | High |

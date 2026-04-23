@@ -206,7 +206,7 @@ ai-rtl-verif-platform/
 │       ├── hooks/                # useVerificationSocket.ts
 │       └── api/                  # client.ts
 ├── docs/
-│   ├── ROADMAP.md
+│   ├── TODO.md
 │   └── superpowers/specs/        # this file
 ├── Makefile                      # extended with backend/frontend targets
 └── CLAUDE.md
@@ -240,7 +240,7 @@ Estimated: ~6–7 weeks total.
 
 ## 8. Future Improvements
 
-See `docs/ROADMAP.md` for detailed breakdown of:
+See `docs/TODO.md` for detailed breakdown of:
 - FSM transition coverage (next after MVP)
 - Functional covergroups
 - SVA formal property input

@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Frontend implementation plan:** `docs/superpowers/plans/2026-04-23-frontend.md` — 8 tasks (M9), TDD, ready to execute. **Start here next session.**
 
-**Future improvements:** `docs/superpowers/ROADMAP.md` — 7 items with industry context, pros/cons, priority table.
+**Future improvements:** `docs/TODO.md` — 8 items with industry context, pros/cons, priority table.
 
 ## What to Build Next
 
@@ -41,7 +41,7 @@ Execute `docs/superpowers/plans/2026-04-23-frontend.md` using the `superpowers:e
 | Coverage metric | Verilator line+branch (`--coverage`) → lcov `.info` | Native, zero extra tooling |
 | Backend | FastAPI (Python) + WebSocket | Shares language with cocotb; async-native |
 | Frontend | React + TypeScript + Vite | Best dashboard ecosystem |
-| RTL parser | Regex-based (MVP) | Practical for UART; pyslang upgrade in ROADMAP |
+| RTL parser | Regex-based (MVP) | Practical for UART; pyslang upgrade in TODO |
 | Prompt caching | Anthropic SDK ephemeral cache on RTL context block | Saves tokens on iterations 2+ |
 | Scope | General platform, UART as reference demo | Forces clean abstractions |
 
@@ -76,7 +76,7 @@ ai-rtl-verif-platform/
 │   └── main.py
 ├── frontend/               # React + Vite + TypeScript (Phase 2, after backend)
 ├── docs/
-│   ├── ROADMAP.md
+│   ├── TODO.md
 │   └── superpowers/
 │       ├── specs/          # 2026-04-23-architecture-design.md
 │       └── plans/          # 2026-04-23-backend.md

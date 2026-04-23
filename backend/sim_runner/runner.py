@@ -1,10 +1,12 @@
 import asyncio
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Awaitable
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _GENERATED_DIR = _PROJECT_ROOT / "generated"
+_SIM_BUILD = _PROJECT_ROOT / "sim_build"
 
 
 @dataclass
@@ -32,6 +34,12 @@ async def run_simulation(
     module_name = f"test_iter_{iteration}"
     test_file = test_dir / f"{module_name}.py"
     test_file.write_text(test_code)
+
+    # Verilator caches a compiled sim_build/ with the previous TOPLEVEL baked in.
+    # If the toplevel doesn't match, cocotb crashes with "Can not find root handle".
+    # Clean on iteration 1 of each run to force a fresh build.
+    if iteration == 1 and _SIM_BUILD.exists():
+        shutil.rmtree(_SIM_BUILD, ignore_errors=True)
 
     coverage_dat = _PROJECT_ROOT / "coverage.dat"
     coverage_dat.unlink(missing_ok=True)
