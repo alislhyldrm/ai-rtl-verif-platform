@@ -27,7 +27,7 @@ export function SetupPage() {
     <div className="max-w-2xl space-y-6">
       <h1 className="text-xl font-semibold">Verification Setup</h1>
       {!iface ? (
-        <RtlUploader onUploaded={(i, f) => { setIface(i); setFilename(f); }} />
+        <RtlUploader onUploaded={(i, f) => { setIface(i); setFilename(`uploads/${f}`); }} />
       ) : (
         <div className="space-y-4">
           <InterfacePreview iface={iface} />

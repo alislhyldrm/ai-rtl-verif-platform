@@ -116,6 +116,7 @@ For `uart_rx`: did we cover IDLE→START, START→IDLE (false start), DATA→STO
 - Outputs are binary (match / mismatch) — easy to reason about
 
 **Disadvantages:** 
+
 - Model bugs can mask RTL bugs — need to trust the model
 - Model must be kept in sync with RTL changes
 

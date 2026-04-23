@@ -36,6 +36,7 @@ export async function startRun(plan: VerificationPlan): Promise<RunResponse> {
 
 export async function getReport(runId: string): Promise<RunReport> {
   const res = await fetch(`/api/runs/${runId}/report`);
+  if (res.status === 202) throw new Error("not ready");
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

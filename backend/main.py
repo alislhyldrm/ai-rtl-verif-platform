@@ -78,14 +78,20 @@ async def _run_loop(run_id: str, plan: VerificationPlan) -> None:
             except Exception:
                 pass
 
-    loop = VerificationLoop(plan=plan)
-    report = await loop.run(run_id=run_id, on_event=broadcast)
-    _runs[run_id]["status"] = "done"
-    _runs[run_id]["report"] = {
-        "final_pct": report.final_pct,
-        "iterations": len(report.iterations),
-        "target_reached": report.target_reached,
-    }
+    try:
+        loop = VerificationLoop(plan=plan)
+        report = await loop.run(run_id=run_id, on_event=broadcast)
+        _runs[run_id]["status"] = "done"
+        _runs[run_id]["report"] = {
+            "final_pct": report.final_pct,
+            "iterations": len(report.iterations),
+            "target_reached": report.target_reached,
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        _runs[run_id]["status"] = "error"
+        await broadcast({"type": "error", "detail": str(e)})
 
 
 @app.get("/api/runs/{run_id}/report")

@@ -6,7 +6,7 @@ import { CoveragePanel } from "@/components/run/CoveragePanel";
 import { TestCodeViewer } from "@/components/run/TestCodeViewer";
 import { Button } from "@/components/ui/button";
 import { cancelRun } from "@/api/client";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 
 export function RunPage() {
   const { runId } = useParams<{ runId: string }>();
@@ -34,6 +34,14 @@ export function RunPage() {
         )}
       </div>
 
+      {run.status !== "done" && run.currentIteration === 0 && (
+        <div className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))] rounded-md p-3">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Running verification loop — Claude is generating tests and Verilator is simulating.
+          This takes about 60 seconds per iteration. Polling for results…
+        </div>
+      )}
+
       <IterationStepper
         iteration={run.currentIteration}
         maxIterations={10}
@@ -55,7 +63,7 @@ export function RunPage() {
         <TestCodeViewer runId={runId!} testUrls={run.testUrls} />
       )}
 
-      {run.status === "done" && run.finalReport && (
+      {run.status === "done" && run.finalReport && typeof run.finalReport.final_pct === "number" && (
         <div className="rounded-lg border border-[hsl(var(--border))] p-4 text-sm">
           <p className="font-medium mb-1">
             {run.finalReport.target_reached ? "✓ Target reached" : "✗ Target not reached"}

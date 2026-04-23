@@ -1,4 +1,4 @@
-import LazyLog from "@melloware/react-logviewer";
+import { LazyLog } from "@melloware/react-logviewer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
