@@ -72,3 +72,14 @@ def parse_coverage_dat(dat_path: Path) -> CoverageResult:
     info_path = dat_path.with_suffix(".info")
     _dat_to_info(dat_path, info_path)
     return parse_coverage_info(info_path)
+
+
+def parse_coverage_dats(dat_paths: list[Path]) -> CoverageResult:
+    """Merges multiple .dat files into one .info and parses cumulative coverage."""
+    if not dat_paths:
+        return CoverageResult(pct=0.0)
+    info_path = dat_paths[0].parent / "coverage_merged.info"
+    cmd = ["verilator_coverage", "--write-info", str(info_path)]
+    cmd.extend(str(p) for p in dat_paths)
+    subprocess.run(cmd, check=True, capture_output=True)
+    return parse_coverage_info(info_path)

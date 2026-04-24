@@ -9,28 +9,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Phase 1 (complete):** UART peripheral in SystemVerilog, verified with cocotb + Verilator
 - **Phase 2 (implementation ready):** AI layer — coverage-guided test generation loop with a React web dashboard
 
-## Current State (as of 2026-04-23)
+## Current State (as of 2026-04-24)
 
 **Architecture spec:** `docs/superpowers/specs/2026-04-23-architecture-design.md` — fully approved, read this first.
 
-**Backend:** COMPLETE. All 10 tasks from `docs/superpowers/plans/2026-04-23-backend.md` implemented and passing (25/25 tests green). FastAPI REST + WebSocket, RTL parser, LLM client, sim runner, coverage parser, loop orchestrator.
+**Backend:** COMPLETE. FastAPI REST + WebSocket, RTL parser, LLM client, sim runner, coverage parser, loop orchestrator. 25/25 tests green.
 
-**Frontend implementation plan:** `docs/superpowers/plans/2026-04-23-frontend.md` — 8 tasks (M9), TDD, ready to execute. **Start here next session.**
+**Frontend:** COMPLETE (M9). React + Vite + TypeScript + shadcn. All 8 tasks in `docs/superpowers/plans/2026-04-23-frontend.md` shipped.
+
+**Coverage merging (added 2026-04-24):** Previously the loop only reported the last iteration's coverage — each iteration wiped `coverage.dat`. Now per-iteration dats are stored at `generated/{run_id}/coverage_iter_N.dat` and merged cumulatively each iteration via `parse_coverage_dats()` (calls `verilator_coverage --write-info` with all dats). `max_iterations` in `plans/uart_rx.yaml` bumped 5 → 10.
+
+**Known open issue:** Even with cumulative coverage and 10 iterations, the 90% target is not yet reliably reached on uart_rx. To investigate later — likely causes: AI generates similar tests across iterations (weak gap-driven diversification), prompt may need stronger few-shot examples of branch-specific stimulus, or target is simply too high for regex-parsed RTL context. Revisit prompt_builder.py gap-injection quality first.
 
 **Future improvements:** `docs/TODO.md` — 8 items with industry context, pros/cons, priority table.
 
 ## What to Build Next
 
-Execute `docs/superpowers/plans/2026-04-23-frontend.md` using the `superpowers:executing-plans` or `superpowers:subagent-driven-development` skill. Tasks are:
+Frontend + backend are both shipped end-to-end. Remaining work:
 
-1. Frontend scaffold (Vite + React + TypeScript + shadcn + Tailwind + Vitest)
-2. API types + HTTP client (TypeScript interfaces matching backend Pydantic models)
-3. App shell + routing (dark sidebar, React Router, two pages)
-4. RTL upload + interface preview
-5. Plan configuration form
-6. WebSocket hook (`useVerificationRun`) + run state machine
-7. Live run dashboard (iteration stepper, log viewer, coverage chart)
-8. Test code viewer (Monaco tabs per iteration) + smoke test
+1. **Push coverage closer to target** — diagnose why 90% isn't reached despite cumulative merging. See "Known open issue" above.
+2. Items in `docs/TODO.md` (pyslang parser upgrade, cheaper model routing, dedicated verification agent, etc.).
 
 ## Key Architecture Decisions (do not revisit)
 
@@ -145,7 +143,9 @@ Golden-model style — no UVM. One side drives DUT, Python model drives/reads th
 | 4 | ✅ Done | UART RX engine + center-sampling validation |
 | 5 | ✅ Done | Architecture spec + backend plan written |
 | 6 | ✅ Done | Backend implemented — 25/25 tests green |
-| 7 | 🔄 Next | Frontend implementation (M9) — plan at `docs/superpowers/plans/2026-04-23-frontend.md` |
+| 7 | ✅ Done | Frontend (M9) — all 8 tasks shipped |
+| 8 | ✅ Done | Cumulative coverage merging across iterations |
+| 9 | 🔄 Next | Reach 90% coverage target reliably (prompt/gap diversification) |
 
 ## Key Constraints
 

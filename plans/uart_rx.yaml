@@ -6,5 +6,5 @@ test_data: [0x00, 0xFF, 0xA5, 0xCA, 0x55]
 error_injection:
   - frame_error
 coverage_target_pct: 90
-max_iterations: 5
+max_iterations: 10
 golden_model: tests/test_uart_rx.py

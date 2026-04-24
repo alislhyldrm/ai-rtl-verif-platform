@@ -37,7 +37,7 @@ export function RunPage() {
       {run.status !== "done" && run.currentIteration === 0 && (
         <div className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))] border border-[hsl(var(--border))] rounded-md p-3">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Running verification loop — Claude is generating tests and Verilator is simulating.
+          Running verification loop — AI generating tests and Verilator is simulating.
           This takes about 60 seconds per iteration. Polling for results…
         </div>
       )}

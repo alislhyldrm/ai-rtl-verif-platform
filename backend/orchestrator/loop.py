@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Awaitable
 
-from backend.coverage.parser import CoverageGap, CoverageResult, parse_coverage_dat
+from backend.coverage.parser import CoverageGap, CoverageResult, parse_coverage_dats
 from backend.llm.client import LLMClient
 from backend.llm.prompt_builder import build_rtl_context, build_task_prompt
 from backend.parser.rtl_parser import parse_rtl
@@ -47,6 +47,7 @@ class VerificationLoop:
         rtl_context = build_rtl_context(iface, self.plan)
         report = LoopReport(run_id=run_id, final_pct=0.0)
         gaps: list[CoverageGap] = []
+        accumulated_dats: list[Path] = []
 
         for i in range(1, self.plan.max_iterations + 1):
             await emit({"type": "iteration", "n": i,
@@ -72,9 +73,9 @@ class VerificationLoop:
             await emit({"type": "iteration", "n": i,
                         "of": self.plan.max_iterations, "phase": "analyzing"})
 
-            coverage = CoverageResult(pct=0.0)
             if sim_result.coverage_dat_path.exists():
-                coverage = parse_coverage_dat(sim_result.coverage_dat_path)
+                accumulated_dats.append(sim_result.coverage_dat_path)
+            coverage = parse_coverage_dats(accumulated_dats)
 
             gaps = coverage.gaps
             report.iterations.append(IterationResult(

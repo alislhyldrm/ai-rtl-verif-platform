@@ -48,7 +48,7 @@ async def test_loop_emits_events(plan):
     loop = VerificationLoop(plan=plan, llm=mock_llm)
 
     with patch("backend.orchestrator.loop.run_simulation") as mock_sim, \
-         patch("backend.orchestrator.loop.parse_coverage_dat") as mock_cov:
+         patch("backend.orchestrator.loop.parse_coverage_dats") as mock_cov:
         from backend.sim_runner.runner import SimResult
         from pathlib import Path
         mock_sim.return_value = SimResult(
@@ -74,7 +74,7 @@ async def test_loop_stops_at_target(plan):
     loop = VerificationLoop(plan=plan, llm=mock_llm)
 
     with patch("backend.orchestrator.loop.run_simulation") as mock_sim, \
-         patch("backend.orchestrator.loop.parse_coverage_dat") as mock_cov:
+         patch("backend.orchestrator.loop.parse_coverage_dats") as mock_cov:
         from backend.sim_runner.runner import SimResult
         from pathlib import Path
         mock_sim.return_value = SimResult(

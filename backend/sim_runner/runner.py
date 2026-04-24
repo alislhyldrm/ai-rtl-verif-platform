@@ -64,8 +64,13 @@ async def run_simulation(
             await on_line(line)
 
     await proc.wait()
+
+    iter_dat = test_dir / f"coverage_iter_{iteration}.dat"
+    if coverage_dat.exists():
+        shutil.copy(coverage_dat, iter_dat)
+
     return SimResult(
-        coverage_dat_path=coverage_dat if coverage_dat.exists() else Path(""),
+        coverage_dat_path=iter_dat if iter_dat.exists() else Path(""),
         passed=proc.returncode == 0,
         returncode=proc.returncode or 0,
     )
